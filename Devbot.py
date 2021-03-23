@@ -104,4 +104,4 @@ for extension in extensions:
         print(exc)
 
 
-bot.run("NTc1NzI3NTg4MTUzMDk4MjYw.XNMKGQ.JzZ2Oy0pUAaJglckZ3IRJ8GbGwo")
+bot.run("NTc1NzI3NTg4MTUzMDk4MjYw.XNMKGQ.QeJm3qHvgj6R8BYkcPTrweRT48U")
