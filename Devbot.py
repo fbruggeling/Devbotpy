@@ -1,10 +1,13 @@
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand, SlashCommandOptionType, SlashContext
+from discord_slash.utils.manage_commands import create_option
 from logdna import LogDNAHandler
 import logging
 import asyncio
 import youtube_dl
 import json
+import requests
 
 def get_prefix(bot, msg):
     with open('prefixes.json') as prefix_file:
@@ -19,13 +22,10 @@ def get_prefix(bot, msg):
     else:
         return commands.when_mentioned_or('*')(bot, msg)
 
-def token():
-    with open('token.json') as token_file:
-        token = json.load(token_file)
-
 
 bot = commands.Bot(command_prefix=get_prefix)
 client = discord.Client()
+slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the cl
 extensions = ["Commands", "extensions", "music3", "Tickets"]
 
 
@@ -37,14 +37,37 @@ async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="The code"), status=discord.Status.dnd)
 
 
-#@bot.event
-#async def on_message(ctx):
- #   if ctx.content.lower().startswith("im ") or ctx.content.lower().startswith("i'm "):
-  #      if ctx.content.lower().startswith("im "):msg=ctx.content.lower().replace("im ","",1)
-   #     elif ctx.content.lower().startswith("i'm "):msg=ctx.content.lower().replace("i'm ","",1)
-    #    channel=bot.get_channel(ctx.channel.id)
-     #   await channel.send("Hello "+msg+", I'm god.")
 
+@bot.event
+async def on_message(ctx):
+    if ctx.content.lower().startswith("im ") or ctx.content.lower().startswith("i'm "):
+        if ctx.content.lower().startswith("im "):
+            msg = ctx.content.lower().replace("im ", "", 1)
+        elif ctx.content.lower().startswith("i'm "):
+            msg = ctx.content.lower().replace("i'm ", "", 1)
+        channel = bot.get_channel(ctx.channel.id)
+        await channel.send("Hello " + msg + ", I'm god.")
+
+    await bot.process_commands(ctx)
+
+options = [
+    {
+        "name" : "name",
+        "description" : "Your new presence",
+        "required" : True,
+        "type" : "3"
+
+    }
+]
+
+@slash.slash(name="presence", description="an presence command", guild_ids=[455481676542377995], options= options)
+async def presence(ctx, name):
+    await bot.change_presence(activity=discord.Game(name=name))
+    await ctx.send("Presence was changed")
+
+@slash.slash(name="ping", description="Ping Pong!", guild_ids=[455481676542377995])
+async def ping(ctx):
+    await ctx.send(':ping_pong:Pong! ' + str(round(self.bot.latency, 1)) + 'ms')
 
 key = '101ce33a48b84f927f5c884d80943590'
 
@@ -104,4 +127,4 @@ for extension in extensions:
         print(exc)
 
 
-bot.run("NTc1NzI3NTg4MTUzMDk4MjYw.XNMKGQ.JzZ2Oy0pUAaJglckZ3IRJ8GbGwo")
+bot.run("NTc1NzI3NTg4MTUzMDk4MjYw.XNMKGQ.QeJm3qHvgj6R8BYkcPTrweRT48U")

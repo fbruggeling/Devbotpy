@@ -1,9 +1,13 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from async_timeout import timeout
 import asyncio
 import youtube_dl
 import traceback
+import time
+from itertools import cycle
+import itertools
+import functools
 import time
 
 ytdl_format_options = {
@@ -84,9 +88,10 @@ class Player:
 
         self.queue = SongQueue()
         self.next = asyncio.Event()
-        self.loop = False
+        self._loop = False
 
         self.bot.loop.create_task(self.player_loop(ctx))
+
 
     @property
     def loop(self):
@@ -100,7 +105,7 @@ class Player:
     async def player_loop(self, ctx):
         while not self.bot.is_closed():
             print("loop")
-            self.next.clear()
+           # self.next.clear()
             try:
                 async with timeout(300):
                     source = await self.queue.get()
@@ -291,17 +296,16 @@ class music3(commands.Cog):
 
         await ctx.send('Now playing: {}'.format(query))
 
-    @commands.command()
-    async def loop(self, ctx):
-
-        player = get_player(ctx)
+    @commands.command(name='loop')
+    async def _loop(self, ctx):
+        if ctx.voice_client is None:
+            return await ctx.send("Not connected to a voice channel.")
 
         if not ctx.voice_client.is_playing:
-            return await ctx.send("Not playing anything at the moment")
+            return await ctx.send("Not playing anything pal")
 
-        player.loop
-
-        await ctx.send('Looping the current song')
+        ctx.voice_client.loop = not ctx.voice_client.loop
+        await ctx.message.add_reaction('✅')
 
 def setup(bot):
     bot.add_cog(music3(bot))

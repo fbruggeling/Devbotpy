@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import random
 import json
+from discord_slash import SlashCommand, SlashContext
+
 
 class Commands(commands.Cog):
     def __init__(self, bot):
@@ -167,6 +169,8 @@ class Commands(commands.Cog):
         embed = discord.Embed(description="{} Use `{}` or <@{}> in this guild".format(description, guild_prefix,
                                                                                       self.bot.user.id))
         await ctx.send(embed=embed)
+
+
 
 
 def setup(bot):
