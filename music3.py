@@ -296,17 +296,15 @@ class music3(commands.Cog):
 
         await ctx.send('Now playing: {}'.format(query))
 
-    @commands.command(name='loop')
-    async def _loop(self, ctx):
+    @play.before_invoke
+    async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
-            return await ctx.send("Not connected to a voice channel.")
-
-        if not ctx.voice_client.is_playing:
-            return await ctx.send("Not playing anything pal")
-
-        ctx.voice_client.loop = not ctx.voice_client.loop
-        await ctx.message.add_reaction('✅')
-
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+            else:
+                await ctx.send("You are not connected to a voice channel.")
+                raise commands.CommandError("Author not connected to a voice channel.")
+    
 def setup(bot):
     bot.add_cog(music3(bot))
 

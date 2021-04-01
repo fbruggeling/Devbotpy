@@ -26,7 +26,7 @@ def get_prefix(bot, msg):
 bot = commands.Bot(command_prefix=get_prefix)
 client = discord.Client()
 slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the cl
-extensions = ["Commands", "extensions", "music3", "Tickets"]
+extensions = ["Commands", "extensions", "music3", "slash", "slashmusic"]
 
 
 
@@ -60,14 +60,14 @@ options = [
     }
 ]
 
-@slash.slash(name="presence", description="an presence command", guild_ids=[455481676542377995], options= options)
-async def presence(ctx, name):
-    await bot.change_presence(activity=discord.Game(name=name))
-    await ctx.send("Presence was changed")
+# @slash.slash(name="presence", description="an presence command", guild_ids=[455481676542377995], options= options)
+# async def presence(ctx, name):
+#     await bot.change_presence(activity=discord.Game(name=name))
+#     await ctx.send("Presence was changed")
 
-@slash.slash(name="ping", description="Ping Pong!", guild_ids=[455481676542377995])
-async def ping(ctx):
-    await ctx.send(':ping_pong:Pong! ' + str(round(self.bot.latency, 1)) + 'ms')
+# @slash.slash(name="ping", description="Ping Pong!")
+# async def ping(ctx):
+#     await ctx.send(':ping_pong:Pong! ' + str(round(bot.latency, 1)) + 'ms')
 
 key = '101ce33a48b84f927f5c884d80943590'
 
@@ -82,8 +82,6 @@ log.setLevel(logging.INFO)
 options['index_meta'] = True
 main_handler = LogDNAHandler(key, options)
 log.addHandler(main_handler)
-
-log.warning("Warning message", {'app': 'bloop'})
 log.info("Info message")
 
 dc_log = logging.getLogger('discord')
