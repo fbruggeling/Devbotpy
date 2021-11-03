@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-from discord_slash import SlashCommand, SlashCommandOptionType, SlashContext
-from discord_slash.utils.manage_commands import create_option
+from discord_slash import SlashCommand, SlashContext
 from logdna import LogDNAHandler
 import logging
 import asyncio
@@ -25,7 +24,7 @@ def get_prefix(bot, msg):
 
 bot = commands.Bot(command_prefix=get_prefix)
 client = discord.Client()
-slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the cl
+slash = SlashCommand(bot, sync_commands=True, override_type=True) # Declares slash commands through the cl
 extensions = ["Commands", "extensions", "music3", "slash", "slashmusic"]
 
 

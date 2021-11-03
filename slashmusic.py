@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from async_timeout import timeout
 import asyncio
-import youtube_dl
+import yt_dlp as youtube_dl
 import traceback
 import time
 from itertools import cycle
@@ -21,7 +21,7 @@ ytdl_format_options = {
     'nocheckcertificate': True,
     'ignoreerrors': False,
     'logtostderr': False,
-    'quiet': True,
+    'quiet': False,
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0'  # bind to ipv4 since ipv6 addresses cause issues sometimes
@@ -30,6 +30,8 @@ ytdl_format_options = {
 ffmpeg_options = {
     'options': '-vn'
 }
+
+guild_ids = [690553932627312680, 455481676542377995]
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 players = {}
@@ -137,19 +139,22 @@ class slashmusic(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name="join", description="Joins a voice channel", guild_ids=[455481676542377995])
-    async def join(self, ctx):
+    @cog_ext.cog_slash(name="join", description="Joins a voice channel", guild_ids=guild_ids)
+    async def join(self, ctx: SlashContext):
         channel = ctx.author.voice.channel
         await channel.connect()
         await ctx.send(f':loud_sound:**Joined `{channel}` and bound to `{ctx.channel}`**')
         
 
-    @cog_ext.cog_slash(name="leave", description="Leaves a voice channel", guild_ids=[455481676542377995])
-    async def leave(self, ctx):
+    @cog_ext.cog_slash(name="leave", description="Leaves a voice channel", guild_ids=guild_ids)
+    async def leave(self, ctx: SlashContext):
         """leaves the voice channel"""
-        channel = ctx.author.voice.channel
-        await channel.leave()
-        await ctx.send("Left the voice channel")
+
+        if ctx.voice_client is None:
+            return await ctx.send("Not connected to a voice channel.")
+
+        await ctx.voice_client.disconnect()
+        await ctx.send(":white_check_mark: **Succesfully disconnected**")
     
     play = [
         {
@@ -160,8 +165,15 @@ class slashmusic(commands.Cog):
         }
     ]
 
-    @cog_ext.cog_slash(name="play", description="An play command", guild_ids=[455481676542377995], options = play)
-    async def play(self, ctx, url):
+    @cog_ext.cog_slash(name="play", description="An play command", guild_ids=guild_ids, options = play)
+    async def play(self, ctx: SlashContext, url):
+
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+            else:
+                await ctx.send("You are not in a voice channel!")
+                raise commands.CommandError("Author not in a voice channel")
 
         source = await YTDLSource.from_url(url, loop=self.bot.loop)
         player = get_player(ctx)
@@ -185,6 +197,39 @@ class slashmusic(commands.Cog):
 
 
         await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(name="pause", description="An pause command", guild_ids=guild_ids,)
+    async def pause(self, ctx: SlashContext):
+
+        if ctx.voice_client is None:
+            return await ctx.send("**Not connected to a voice channel**")
+
+        ctx.voice_client.pause()
+
+        await ctx.send(':musical_note:**Music has been paused**:musical_note:')
+
+    @cog_ext.cog_slash(name="resume", description="An resume command", guild_ids=guild_ids)
+    async def resume(self, ctx: SlashContext):
+
+        if ctx.voice_client is None:
+            return await ctx.send("**Not connected to a voice channel**")
+
+        ctx.voice_client.resume()
+
+        await ctx.send(':musical_note:**Music has been resumed**:musical_note:')
+
+    @cog_ext.cog_slash(name="stop", description="An stop command", guild_ids=guild_ids)
+    async def stop(self, ctx: SlashContext):
+
+        if ctx.voice_client is None:
+            return await ctx.send("**Not connected to a voice channel**")
+
+        player = get_player(ctx)
+
+        player.queue.clear()
+        ctx.voice_client.stop()
+
+        await ctx.send("**Music has been stopped!**")
 
 def setup(bot):
     bot.add_cog(slashmusic(bot))

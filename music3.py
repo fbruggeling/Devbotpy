@@ -2,13 +2,15 @@ import discord
 from discord.ext import commands, tasks
 from async_timeout import timeout
 import asyncio
-import youtube_dl
+import yt_dlp as youtube_dl
 import traceback
 import time
 from itertools import cycle
 import itertools
 import functools
 import time
+
+
 
 ytdl_format_options = {
     'format': 'bestaudio/best',
@@ -166,6 +168,7 @@ class music3(commands.Cog):
             player = get_player(ctx)
             print('ínserting new source into queue')
             await player.queue.put(source)
+
 
         embed= discord.Embed(
 
